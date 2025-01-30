@@ -1,0 +1,4 @@
+name = "ExactPenaltyMirrorDescent"
+uuid = "d7930bdf-a5b6-4895-a45a-35c6d0669b84"
+authors = ["bogdankjastrzebski <bogdan.k.jastrzebski@gmail.com>"]
+version = "0.1.0"

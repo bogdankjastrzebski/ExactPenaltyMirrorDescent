@@ -29,4 +29,5 @@ function convergence_plot(f, xss)
 end
 
 view_3d(rosenbrock, xs[:, 1:1000])
+
 savefig("rosenbrock_3d.pdf")

@@ -8,7 +8,7 @@ end
 
 identity_mirror = Mirror(identity, identity)
 
-"""`mirror_descent_update(M, f, γ, x, λ=0, v=0)`
+"""mirror_descent_update(M, f, γ, x, λ=0, v=0)
 
 # Arguments
 * M: mirror map.
@@ -34,6 +34,33 @@ function mirror_descent_update(
 end
 
 
+"""mirror_descent(f, x, γ=n->1/n, λ=n->1;
+                  mirror=identity_mirror,
+                  project=identity,
+                  iterations=1000)
+
+Minimize `f` using mirror descent.
+
+# Arguments
+*   `f`: Objective function (gradient/subgradient).
+*   `x`: Initial point.
+*   `γ`: Step size function (default: `n->1/n`).
+*   `λ`: Regularization parameter function (default: `n->1`).
+
+# Keywords
+*   `mirror`: Mirror map (default: `identity_mirror`).
+*   `project`: Projection function (default: `identity`).
+*   `iterations`: Number of iterations (default: 1000).
+
+# Returns
+Tuple: `(xs, vs)` - history of `x` and `v` states as matrices.
+
+# Example
+```julia
+# f(x) = [2*x[1], 4*x[2]] # Gradient of x[1]^2 + 2*x[2]^2
+# x0 = [1.0, 1.0]
+# xs, vs = mirror_descent(f, x0, iterations=100)
+"""
 function mirror_descent(
         f, x, γ=n->1.0/n, λ=n->1;
         mirror=identity_mirror,

@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
@@ -12,6 +13,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 DataFrames = "1.7.0"
+Graphs = "1.12.0"
 PGFPlotsX = "1.6.2"
 Plots = "1.40.9"
 Revise = "3.7.2"

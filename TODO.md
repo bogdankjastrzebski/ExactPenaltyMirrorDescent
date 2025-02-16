@@ -1,6 +1,7 @@
 # TODO
 
 Priority queue:
+- [x] benchmark rosenbrock
 - [x] export objectives
     - [ ] name objectives
     - [ ] how to do random objective
@@ -21,8 +22,8 @@ Priority queue:
               noise type (it's
               composite) we will do 
               as a separate test.
-- [ ] write the whole thing up
 - [ ] 
+- [ ] write the whole thing up
 
 
 

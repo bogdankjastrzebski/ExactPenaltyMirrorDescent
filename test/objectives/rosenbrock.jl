@@ -13,10 +13,7 @@ function rosenbrock_random(x; a=1, b=100, n=1)
     )
 end
 
-
 function rosenbrock_projection(x)
    return x / sqrt(x'x)
 end
-
-
 

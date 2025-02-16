@@ -23,17 +23,17 @@ objectives["first"] = (
 
 
 # Second
-function second(x)
+function second_objective(x)
     return prod(x.^2)
 end
 
-function second_projection(x)
+function second_objective_projection(x)
     return clamp.(x, -1.0, 1.0)
 end
 
 objectives["second"] = (
     second_objective,
-    second_projection,
+    second_objective_projection,
 )
 
 # Rastrigin

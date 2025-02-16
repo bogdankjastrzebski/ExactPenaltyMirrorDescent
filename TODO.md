@@ -1,9 +1,11 @@
 # TODO
-
 Priority queue:
 - [x] benchmark rosenbrock
+- [x] move binary embedding to new file
 - [x] export objectives
-    - [ ] name objectives
+    - [x] name objectives
+    - [ ] visualize objectives
+    - [ ] write projections
     - [ ] how to do random objective
         - [x] we need random oracle,
               this one is easy, we
@@ -22,9 +24,11 @@ Priority queue:
               noise type (it's
               composite) we will do 
               as a separate test.
-- [ ] 
+    - [ ]
+- [x] test binort penalty (should not be problematic)
+- [x] binary embedding will work!
+- [ ] binary embedding cuda?
 - [ ] write the whole thing up
-
-
+- [ ] pewnych rzeczy się nie nauczysz, może trzeba właśnie szukać tak, by nie trzeba było się dalej uczyć?
 
 

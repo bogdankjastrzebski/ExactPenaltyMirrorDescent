@@ -45,6 +45,15 @@ function rastrigin(x, a=10)
     return a * length(x) + sum(x.^2 - a * cos.(2π * x))
 end
 
+function rastrigin_projection(x)
+    return    
+end
+
+objectives["rastrigin"] = (
+    rastrigin,
+    rastrigin_projection,
+)
+
 
 # Ackley
 """
@@ -58,7 +67,10 @@ function ackley(x)
        + exp(1) + 20
     )
 end
-
+objectives["ackley"] = (
+    ackley,
+    ackley_projection,
+)
 
 # Sphere
 """
@@ -68,6 +80,11 @@ min = 0
 function sphere(x)
     return x'x
 end
+
+objectives["sphere"] = (
+    sphere,
+    sphere_projection,
+)
 
 
 # Beale
@@ -79,6 +96,11 @@ function beale(x)
     )
     return h(x[1], x[2])
 end
+
+objectives["beale"] = (
+    beale,
+    beale_projection,
+)
 
 # Goldstein
 function goldstein_price(x)
@@ -92,11 +114,22 @@ function goldstein_price(x)
     return h(x[1], x[2])
 end
 
+objectives["goldstein_price"] = (
+    goldstein_price,
+    goldstein_price_projection,
+)
 
+
+# Booth
 function booth(x)
     h(x, y) = (x + 2y - 7)^2 + (2x + y - 5)^2
     return h(x[1], x[2])
 end
+
+objectives["booth"] = (
+    booth,
+    booth_projection,
+)
 
 
 function bukin(x)
@@ -104,23 +137,40 @@ function bukin(x)
     return h(x[1], x[2])
 end
 
+objectives["bukin"] = (
+    bukin,
+    bukin_projection,
+)
+
 
 function matyas(x)
     h(x, y) = 0.26 * (x^2 + y^2) - 0.48x*y
     return h(x[1], x[2])
 end
 
+objectives["matyas"] = (
+    matyas,
+    matyas_projection,
+)
 
 function himmelblau(x)
     h(x, y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2 
     return h(x[1], x[2])
 end
+objectives["himmelblau"] = (
+    himmelblau,
+    himmelblau_projection,
+)
 
 
 function three_hump_camel(x)
     h(x, y) = 2x^2 - 1.05x^4 + x^6 / 6 + x*y + y^2
     return h(x[1], x[2])
 end
+objectives["three_hump_camel"] = (
+    three_hump_camel,
+    three_hump_camel_projection,
+)
 
 
 function easom(x)
@@ -129,7 +179,10 @@ function easom(x)
     h(x, y) = -cos(x)*cos(y)*exp(- (x - π)^2 - (y - π)^2)
     return h(x[1], x[2])
 end
-
+objectives["easom"] = (
+    easom,
+    easom_projection,
+)
 
 function mccormick(x)
     """
@@ -139,67 +192,17 @@ function mccormick(x)
     return h(x[1], x[2])
 end
 
+objectives["mccormick"] = (
+    mccormick,
+    mccormick_projection,
+)
+
 
 function styblinski_tang(x)
     return 0.5sum(x.^4 - 16x.^2 + 5x)
 end
 
-
-function binary_embedding(x, L)
-    return sum((L'x) .* x)
-end
-
-
-function binary_embedding_penalty(x)
-    return -x'x
-end
-
-
-function project(x, y, ϵ=1e-4)
-    y = y / max(norm(y), ϵ)
-    return (x'y) * y
-end
-
-
-"""
-projection into intersection of:
-A: to [-1 1]
-B: to be orthogonal
-"""
-function binary_embedding_projection(x, n=10, ϵ=1e-4)
-    # Fit to Cube
-    @inline function pa(v)
-        clamp.(v, -one(eltype(v)), one(eltype(v)))
-    end
-    # Orthogonalize
-    """
-    Remember, x has to orthogonal!
-    """
-    @inline function pb(v, x)
-        d = max.(sum(x -> x^2, x, dims=1), ϵ)
-        return v - sum((v'x ./ d) .* x, dims=2)
-    end
-    # Alphabet
-    ret = zero(x)
-    p = zeros(eltype(x), size(x, 1))
-    q = zeros(eltype(x), size(x, 1))
-    v = zeros(eltype(x), size(x, 1))
-    y = zeros(eltype(x), size(x, 1))
-    vp = zeros(eltype(x), size(x, 1))
-    yq = zeros(eltype(x), size(x, 1))
-    for i in 1:size(x, 2)
-        p .= 0
-        q .= 0
-        v .= x[:, i]
-        for _ in 1:n
-            @. vp = v + p
-            y .= pb(vp, view(ret, :, 1:i-1))
-            @. p = vp - y
-            @. yq = y + q
-            v .= pa(yq)
-            @. q = yq - v
-        end
-        ret[:, i] .= v
-    end
-    return ret
-end
+objectives["styblinski_tang"] = (
+    styblinski_tang,
+    styblinski_tang_projection,
+)

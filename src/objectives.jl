@@ -12,7 +12,8 @@ function first_projection(x)
     r, θ = x[1], x[2]
     return [
         clamp(r, 0.0, 1.0),
-        clamp(r, 0.0, 2π),
+        θ,
+        # clamp(θ, 0.0, 2π), # ?
     ]
 end
 
@@ -76,11 +77,11 @@ function ackley(x)
 end
 
 
+"""
+argmin = (0, 0)
+min = 0
+"""
 function sphere(x)
-    """
-    argmin = (0, 0)
-    min = 0
-    """
     return x'x
 end
 
@@ -170,45 +171,51 @@ function binary_embedding_penalty(x)
 end
 
 
-function project(x, y, ϵ=1e-3)
+function project(x, y, ϵ=1e-4)
     y = y / max(norm(y), ϵ)
     return (x'y) * y
 end
 
 
-function binary_embedding_projection(x, n=10)
-    """
-    projection into intersection of:
-    A: to [-1 1]
-    B: to be orthogonal
-    """
-    for i in 1:size(x, 1)
-        
+"""
+projection into intersection of:
+A: to [-1 1]
+B: to be orthogonal
+"""
+function binary_embedding_projection(x, n=10, ϵ=1e-4)
     # Fit to Cube
-    function pa(x)
-        clamp.(x, -one(eltype(x)), one(eltype(x)))
+    @inline function pa(v)
+        clamp.(v, -one(eltype(v)), one(eltype(v)))
     end
     # Orthogonalize
-    function pb(x)
-        for i in 1:size(x, 2)-1
-            for j in i+1:size(x, 2)
-                x[:, j] -= project(x[:, j], x[:, i])
-            end
+    """
+    Remember, x has to orthogonal!
+    """
+    @inline function pb(v, x)
+        d = max.(sum(x -> x^2, x, dims=1), ϵ)
+        return v - sum((v'x ./ d) .* x, dims=2)
+    end
+    # Alphabet
+    ret = zero(x)
+    p = zeros(eltype(x), size(x, 1))
+    q = zeros(eltype(x), size(x, 1))
+    v = zeros(eltype(x), size(x, 1))
+    y = zeros(eltype(x), size(x, 1))
+    vp = zeros(eltype(x), size(x, 1))
+    yq = zeros(eltype(x), size(x, 1))
+    for i in 1:size(x, 2)
+        p .= 0
+        q .= 0
+        v .= x[:, i]
+        for _ in 1:n
+            @. vp = v + p
+            y .= pb(vp, view(ret, :, 1:i-1))
+            @. p = vp - y
+            @. yq = y + q
+            v .= pa(yq)
+            @. q = yq - v
         end
-        return x
+        ret[:, i] .= v
     end
-    x = copy(x)
-    p = zero(x)
-    q = zero(x)
-    for _ in 1:n
-        y = pa(x + p)
-        p = x + p - y
-        x = pb(y + q)
-        q = y + q - x
-    end
-    return x
+    return ret
 end
-
-# pro(x + y)
-
-

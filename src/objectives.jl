@@ -1,11 +1,14 @@
 
-function first_objective(x)
-    r, θ = x[1], x[2]
-    return (3 + sin(5θ) + cos(3θ)) * r^2 * (5/3) * r
+function objective_random(objective)
+    
 end
 
-function first_objective_random(x, σ=0.1)
-    return first_objective(x) + σ * randn()
+objectives = Dict()
+
+# First
+function first(x)
+    r, θ = x[1], x[2]
+    return (3 + sin(5θ) + cos(3θ)) * r^2 * (5/3) * r
 end
 
 function first_projection(x)
@@ -17,11 +20,18 @@ function first_projection(x)
     ]
 end
 
-function second_objective(x)
+objectives["first"] = (
+    first_objective,
+    first_projection,
+)
+
+# Second
+
+function second(x)
     return prod(x.^2)
 end
 
-function second_objective_random(x, σ=0.1)
+function second_random(x, σ=0.1)
     return second_objective(x) + σ * randn()
 end
 
@@ -29,15 +39,20 @@ function second_projection(x)
     return clamp.(x, -1.0, 1.0)
 end
 
+objectives["second"] = (
+    second_objective,
+    second_objective_random,
+    second_projection,
+)
+
+# Rosenbrock
 
 function rosenbrock(x; a=1, b=100)
-    # return sum(rb(i, x, a=a, b=b) for i in 1:length(x)-1)
     return sum(
         b * (x[2:end] - x[1:end-1].^2).^2
         + (a .- x[1:end-1]).^2
     )
 end
-
 
 function rosenbrock_random(x; a=1, b=100, n=1)
     return sum(
@@ -46,30 +61,34 @@ function rosenbrock_random(x; a=1, b=100, n=1)
     )
 end
 
-
 function rosenbrock_projection(x)
-    """rosenbrock_projection
-    ||x|| <= 1
-    """
-    return x / sqrt(x'x)
+   return x / sqrt(x'x)
 end
 
+objectives["rosenbrock"] = (
+    rosenbrock,
+    rosenbrock_random,
+    rosenbrock_projection,
+)
 
+# Rastrigin
+
+"""
+argmin = (0, 0)
+min = 0
+"""
 function rastrigin(x, a=10)
-    """
-    argmin = (0, 0)
-    min = 0
-    """
     return a * length(x) + sum(x.^2 - a * cos.(2π * x))
 end
 
 
+# Ackley
+"""
+argmin = (0, 0)
+min = 0
+"""
 function ackley(x)
-    """
-    argmin = (0, 0)
-    min = 0
-    """
-    return (
+   return (
        - 20 * exp(-0.2sqrt(0.5*x'x))
        - exp(0.5sum(cos.(2π*x)))
        + exp(1) + 20
@@ -77,6 +96,7 @@ function ackley(x)
 end
 
 
+# Sphere
 """
 argmin = (0, 0)
 min = 0
@@ -86,6 +106,7 @@ function sphere(x)
 end
 
 
+# Beale
 function beale(x)
     h(x, y) = (
           (1.50  - x + x * y).^2
@@ -95,7 +116,7 @@ function beale(x)
     return h(x[1], x[2])
 end
 
-
+# Goldstein
 function goldstein_price(x)
     h(x, y) = (
         1 + (x + y + 1)^2
@@ -158,7 +179,6 @@ end
 function styblinski_tang(x)
     return 0.5sum(x.^4 - 16x.^2 + 5x)
 end
-
 
 
 function binary_embedding(x, L)

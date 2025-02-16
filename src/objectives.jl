@@ -1,17 +1,13 @@
 
-function objective_random(objective)
-    
-end
-
 objectives = Dict()
 
 # First
-function first(x)
+function first_objective(x)
     r, θ = x[1], x[2]
     return (3 + sin(5θ) + cos(3θ)) * r^2 * (5/3) * r
 end
 
-function first_projection(x)
+function first_objective_projection(x)
     r, θ = x[1], x[2]
     return [
         clamp(r, 0.0, 1.0),
@@ -22,17 +18,13 @@ end
 
 objectives["first"] = (
     first_objective,
-    first_projection,
+    first_objective_projection,
 )
 
-# Second
 
+# Second
 function second(x)
     return prod(x.^2)
-end
-
-function second_random(x, σ=0.1)
-    return second_objective(x) + σ * randn()
 end
 
 function second_projection(x)
@@ -41,38 +33,10 @@ end
 
 objectives["second"] = (
     second_objective,
-    second_objective_random,
     second_projection,
 )
 
-# Rosenbrock
-
-function rosenbrock(x; a=1, b=100)
-    return sum(
-        b * (x[2:end] - x[1:end-1].^2).^2
-        + (a .- x[1:end-1]).^2
-    )
-end
-
-function rosenbrock_random(x; a=1, b=100, n=1)
-    return sum(
-        b * (x[i+1] + x[i]^2)^2 + (a - x[i])^2
-        for i in rand(1:length(x)-1, n)
-    )
-end
-
-function rosenbrock_projection(x)
-   return x / sqrt(x'x)
-end
-
-objectives["rosenbrock"] = (
-    rosenbrock,
-    rosenbrock_random,
-    rosenbrock_projection,
-)
-
 # Rastrigin
-
 """
 argmin = (0, 0)
 min = 0

@@ -14,12 +14,12 @@ Priority queue:
         - [ ] we would like to test
               many different noise
               distributions.
-        - [ ] divide objectives into
+        - [x] divide objectives into
               easy objectives, with
               known function, where 
               we just add a random noise
               to the gradient oracle.
-        - [ ] rosenbrock function, 
+        - [x] rosenbrock function, 
               which has a different
               noise type (it's
               composite) we will do 

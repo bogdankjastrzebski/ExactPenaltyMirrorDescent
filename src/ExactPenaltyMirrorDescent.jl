@@ -6,4 +6,6 @@ export  mirror_descent,
         identity_mirror
 
 include("mirror_descent.jl")
+include("objectives/Objectives.jl")
+
 end # module ExactPenaltyMirrorDescent

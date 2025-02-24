@@ -4,7 +4,7 @@ Priority queue:
 - [x] move binary embedding to new file
 - [x] export objectives
     - [x] name objectives
-    - [ ] visualize objectives
+    - [x] visualize objectives
     - [ ] write projections
     - [ ] how to do random objective
         - [x] we need random oracle,

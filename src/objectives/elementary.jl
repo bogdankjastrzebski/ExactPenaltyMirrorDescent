@@ -1,12 +1,28 @@
 
 objectives = Dict()
 
+function atan2(y, x)
+    if x > 0
+        return atan(y / x)
+    elseif x < 0 && y >= 0
+        return atan(y / x) + π
+    elseif x < 0 && y < 0
+        return atan(y / x) - π 
+    elseif x == 0 && y > 0
+        return π / 2
+    elseif x == 0 && y < 0
+        return -π / 2
+    else # x == 0 && y == 0
+        return 0.0
+    end
+end
+
 # First
 function first_objective(x)
     r = sqrt(x[1]^2 + x[2]^2)
-    θ = atan(x[2]/x[1])
+    θ = atan2(x[2], x[1])
     # r, θ = x[1], x[2]
-    return (3 + sin(5θ) + cos(3θ)) * r^2 * (5/3) * r
+    return (3 + sin(5θ) + cos(3θ)) * r^2 * (5/3 - r)
 end
 
 function first_objective_projection(x)
@@ -23,8 +39,8 @@ objectives["first_objective"] = (
     first_objective_projection,
     Nothing,
     Nothing, # mirror
-    ((-12, 15), (-11, 16), (0, 50000)),
-    [0, 0],
+    ((-1, 1), (-1, 1), (0, 5)),
+    [1., 1.],
     (45, 45), # camera
 )
 
@@ -38,13 +54,14 @@ function second_objective_projection(x)
     return clamp.(x, -1.0, 1.0)
 end
 
+
 objectives["second_objective"] = (
     second_objective,
     second_objective_projection,
     Nothing,
     Nothing, # mirror
     ((-12, 15), (-11, 16), (0, 50000)),
-    [0, 0],
+    [10., 10.],
     (45, 45), # camera
 )
 
@@ -68,7 +85,7 @@ objectives["rastrigin"] = (
     Nothing, 
     Nothing, # mirror
     ((-5, 5), (-5, 5), (0, 100)),
-    [0, 0],
+    ones(2),
     (45, 45), # camera
 #    beale_projection,
 #     rastrigin_projection,
@@ -94,8 +111,8 @@ objectives["ackley"] = (
     Nothing, # projection,
     Nothing,
     Nothing, # mirror
-    ((-12, 15), (-11, 16)),
-    [0, 0],
+    ((-5, 5), (-5, 5), (0, 20)),
+    ones(2),
     (45, 45), # camera
 #    beale_projection,
 )
@@ -115,8 +132,8 @@ objectives["sphere"] = (
     Nothing, # projection,
     Nothing,
     Nothing, # mirror
-    ((-12, 15), (-11, 16)),
-    [0, 0],
+    ((-5, 5), (-5, 5), (-1, 19)),
+    ones(2),
     (45, 45), # camera
 #    beale_projection,
 )
@@ -137,8 +154,8 @@ objectives["beale"] = (
     Nothing, # projection,
     Nothing,
     Nothing, # mirror
-    ((-12, 15), (-11, 16), (0, 1000)),
-    [0, 0],
+    ((-5, 5), (-5, 5), (0, 1000)),
+    ones(2),
     (45, 45), # camera
 )
 
@@ -154,15 +171,40 @@ function goldstein_price(x)
     return h(x[1], x[2])
 end
 
+
+"""
+Bound the goldstein price argument (in norm) for
+numerical stability. 
+"""
+function goldstein_price_projection(x, A=-1.0, B=1.5)
+    # return norm(x) > B ? B * x / norm(x) : x
+    return clamp.(x, A, B)
+end
+
+
+"""goldstein_price_penalty(x, x₂=-0.5)
+Exact penalty, which keeps x₂ near the
+desired value.
+# Args:
+* x - argument in R².
+* x₂ - desired value of the second. (default -0.5)
+    For -0.5 the problem is two modal, so it is
+    interesting, if it will be able to find the
+    proper minimum.
+"""
+function goldstein_price_penalty(x, x₂=-0.5)
+    return (abs(x[2] - x₂) + 2.0)^2
+end
+
+
 objectives["goldstein_price"] = (
     goldstein_price,
-#    goldstein_price_projection,
-    Nothing, # projection,
-    Nothing,
+    goldstein_price_projection,
+    goldstein_price_penalty,
     Nothing, # mirror
-    ((-3, 1), (-2, 2), (0, 10000)),
-    [0, 0],
-    (45, 45), # camera
+    ((-2, 2), (-3, 1), (0, 10000)),
+    [1., 0.],
+    (135, 45), # camera
 )
 
 
@@ -178,7 +220,7 @@ objectives["booth"] = (
     Nothing,
     Nothing, # mirror
     ((-12, 15), (-11, 16), (0, 1000)),
-    [0, 0],
+    ones(2),
     (45, 45), # camera
 )
 
@@ -193,8 +235,8 @@ objectives["bukin"] = (
     Nothing,  # bukin_projection,
     Nothing,
     Nothing, # mirror
-    ((-15, 7), (-4, 6), (0, 250)),
-    [0, 0],
+    ((-5, 5), (-4, 6), (0, 250)),
+    ones(2),
     (45, 45), # camera
 )
 
@@ -210,7 +252,7 @@ objectives["matyas"] = (
     Nothing,
     Nothing, # mirror
     ((-10, 10), (-10, 10), (0, 10)),
-    [0, 0],
+    ones(2),
     (45, 45), # camera
 )
 
@@ -225,7 +267,7 @@ objectives["himmelblau"] = (
     Nothing,
     Nothing,
     ((-5, 5), (-5, 5), (0, 500)),
-    [0, 0],
+    ones(2),
     (45, 45), # camera
 )
 
@@ -239,8 +281,8 @@ objectives["three_hump_camel"] = (
     Nothing,#    himmelblau_projection,
     Nothing,
     Nothing,
-    ((-5, 5), (-5, 5), (0, 500)),
-    [0, 0],
+    ((-3, 3), (-3, 3), (0, 50)),
+    ones(2),
     (45, 45), # camera
 )
 
@@ -253,10 +295,10 @@ function easom(x)
 end
 objectives["easom"] = (
     easom,
-    Nothing, # easom_projection,
+    Nothing, # projection,
     Nothing, # Penalty
     Nothing,
-    ((-1, 7), (-1, 7), (-1, +0.1)),
+    ((1, 5), (1, 5), (-1, 0.1)),
     [2, 2], # x₀
     (45, 45),
 )
@@ -271,6 +313,12 @@ end
 
 objectives["mccormick"] = (
     mccormick,
+    Nothing, # projection,
+    Nothing, # Penalty
+    Nothing,
+    ((-3, 4), (-3, 4), (-2, 70)),
+    [2, 2], # x₀
+    (45, 45),
 #     mccormick_projection,
 )
 
@@ -282,5 +330,11 @@ end
 
 objectives["styblinski_tang"] = (
     styblinski_tang,
+    Nothing, # easom_projection,
+    Nothing, # Penalty
+    Nothing,
+    ((-5, 5), (-5, 5), (-100, 250)),
+    [2, 2], # x₀
+    (45, 45),
 #    styblinski_tang_projection,
 )

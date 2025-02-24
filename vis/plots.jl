@@ -1,131 +1,83 @@
 using Plots
 using ExactPenaltyMirrorDescent
+using ExactPenaltyMirrorDescent.Objectives: objectives, atan2
+using LinearAlgebra
 using LaTeXStrings
-using ExactPenaltyMirrorDescent.Objectives: objectives
 
-
-function bound_range(bound, xs, n)
-    l, r = bound
-    l = min(minimum(xs), l)
-    r = max(maximum(xs), r)
-    rng = l:((r-l)/n):r
-    return rng
-end
-
-
-function bounds_ranges(bounds, xs, n)
-    return Tuple( 
-        bound_range(bounds[k], xs[k, :], n)
-        for k in 1:size(xs, 1)
-    )
-end
-
-
-function view_top(
-            f, xs;
-            bounds=((-2, 2), (-2, 2)), n=64,
-            levels=16,
-            ϵ=1e-1,
-        )
-    rng_x, rng_y = bounds_ranges(bounds[1:2], xs, n)
-    # contour(
-    #     rng_x, rng_y,
-    #     (x, y) -> f([x, y]),
-    #     levels=levels,
-    #     fill=true,
-    # )
-    tv = 1:levels
-    tl = [L"e^{$i}" for i in tv]
-    contourf(
-        rng_x, rng_y,
-        # (x, y) -> log(f([x, y]) + 1),
-        # (x, y) -> f([x, y]),
-        (x, y) -> clamp(f([x, y]), bounds[3][1] - ϵ,  bounds[3][2] + ϵ),
-        aspect_ratio=:equal,
-        # colorbar_ticks=(tv, tl),
-        # color_scale=:log,
-        dpi=300,
-        fill=true,
-        color=:turbo,
-        grid=false,
-        levels=levels,
-        # axis=false,
-    )
-    plot!(
-        xs[1, :], xs[2, :],
-        legend=false,
-        aspect_ratio=:equal,
-    )
-end
-
-
-function view_3d(
-            f, xs;
-            bounds=((-2, 2), (-2, 2)), n=64,
-            camera=(150, 30),
-            ϵ=1e-1,
-        )
-    rng_x, rng_y = bounds_ranges(bounds, xs, n)
-    plot(
-        rng_x, rng_y,
-        # (x, y) -> f([x, y]),
-        (x, y) -> clamp(f([x, y]), bounds[3][1] - ϵ,  bounds[3][2] + ϵ),
-        st=:surface,
-        # zscale=:ln,
-        zlim=bounds[3],
-        camera=camera,
-    )
-    #plot!(
-    #    xs[1, :], xs[2, :],
-    #    [f(xs[:, i]) for i in 1:size(xs, 2)],
-    #)
-end
-
-
-function convergence_plot(f, xss)
-    m = size(xss, 1)
-    n = size(xss[1], 2)
-    plot(1:n, [
-        sum(f(xss[j][:, i]) for j in 1:m) / m
-        for i in 1:n
-    ], scale=:ln)
-end
-
-
-
-view_3d(second_objective, [0, 0]);
-savefig("img/second_objective_3d.pdf")
-
-
-view_3d(rosenbrock, xs[:, 1:1000])
-savefig("img/rosenbrock_3d.pdf")
 
 objective_names = [
-#    "first_objective",
-#    "second_objective",
-#     "rastrigin",
-#     "beale",
-#     "goldstein_price",
-#     "booth",
-#     "bukin",
-#     "matyas",
-#     "himmelblau",
-#     "three_hump_camel",
-     "easom",
-#     "sphere",
-#     "mccormick",
-#     "second",
-#     "first",
-#     "ackley",
-#     "styblinski_tang",
+#      "first_objective",
+#      "second_objective",
+#      "rastrigin",
+#      "beale",
+     "goldstein_price",
+#      "booth",
+#      "bukin",
+#      "matyas",
+#      "himmelblau",
+#      "three_hump_camel",
+#      "easom",
+#      "mccormick",
+#      "styblinski_tang",
+#      "sphere",
+#      "ackley",
 ]
+plot_dict = Dict()
+objective = Nothing
+xs = Nothing
+Random.seed!(0)
 for objective_name in objective_names
+  try
     println("Objective: $objective_name")
-    objective, _, _, _, bounds, x₀, camera = objectives[objective_name]
+    objective, projection, penalty, _, bounds, x₀, camera = objectives[objective_name]
     # Top
-    # view_top(objective, [3 3; 3 3], bounds=bounds)
-    # savefig("img/$(objective_name)_top.pdf")
+    function oracle(f, x₀, snr)
+        α = 1/norm(f'(x₀))
+        function temp(x)
+            g = α * f'(x)
+            n = randn(size(x))
+            return g + (norm(g) / norm(n) / snr) * randn(size(x)) 
+        end
+        return temp
+    end
+    objective_penalty = x -> objective(x) + 50*penalty(x)
+    xs, vs = mirror_descent(
+        oracle(objective_penalty, x₀, 0.5),
+        0.1randn(2) + float.(x₀),
+        # γ=n->1.0/(n^0.6),
+        γ=n->1.0/(n^0.6),
+        # λ=n->0.01,
+        λ=n->0.01,
+        iterations=100000,
+    )
+    fig = view_top(objective_penalty, xs, bounds=bounds, n=100, levels=256)
+    title!(transform_name(objective_name))
+    plot!(size=(400, 400))
+    plot!(fontfamily="Computer Modern")
+    savefig("img/$(objective_name)_top.png")
+    # savefig("img/top/$(objective_name)_top.png")
+    # plot_dict[objective_name] = fig
     # 3d
-    view_3d(objective, [3 3; 3 3], bounds=bounds, camera=camera, n=1000);
-    savefig("img/$(objective_name)_3d.pdf")
+    view_3d(objective_penalty, xs, bounds=bounds, camera=camera, n=1000);
+    #savefig("img/3d/$(objective_name)_3d.png")
+    savefig("img/$(objective_name)_3d.png")
+  catch e
+    println("Error: $objective_name")
+    rethrow(e)
+  end
 end
+
+gr()
+
+plot(
+    [plot_dict[name] for name in objective_names]...,
+    layout=(5, 3),
+    size=(3000, 5000),
+    fontfamily="Computer Modern",
+); savefig("img/top/all.png")
+
+
+plot(1:10, cumsum(randn(10)), fontfamily="Computer Modern")
+title!("Hello World");
+savefig("img/test.png")
+

@@ -31,9 +31,9 @@ for k in [1, 10, 100]
 for lr in [0.001, 0.01, 0.05]
     xss = []
     for seed in 1:1
-        println
+        println("n: $n, k: $k, lr: $lr")
         Random.seed!(seed)
-        iter = 1000
+        iter = 10000
         x₀ = zeros(n)
         xs, vs = mirror_descent(
             oracle(k),

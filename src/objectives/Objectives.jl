@@ -26,6 +26,7 @@ export objectives,
        rosenbrock_projection,
        rosenbrock_penalty,
        rosenbrock_through,
-       rosenbrock_back
+       rosenbrock_back,
+       rosenbrock_oracle
 
 end

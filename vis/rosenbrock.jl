@@ -10,6 +10,7 @@ using LinearAlgebra
 using ProgressBars
 using Random
 using Zygote
+using Serialization
 
 
 include("general.jl")

@@ -1,4 +1,4 @@
-# using P] activate .
+#!/home/bodo/.local/bin/julia
 using Pkg
 Pkg.activate(".")
 using ExactPenaltyMirrorDescent
@@ -13,10 +13,10 @@ using Zygote
 using Serialization
 
 
-include("general.jl")
+# include("general.jl")
 
 objective_name = "rosenbrock"
-function oracle(n, p=0.1)
+function oracle(n, p=0.0001)
     function temp(x)
         rosenbrock_random(x, n=n) + p * rosenbrock_penalty(x)
     end
@@ -24,11 +24,9 @@ function oracle(n, p=0.1)
 end
 mirror = Mirror(rosenbrock_through, rosenbrock_back)
 projection = rosenbrock_projection
-
-
 # Finding Best Parameters
 results = Dict()
-iter = 10000
+iter = 10
 for n in [4, 8, 16, 32]
 for k in [1]
 for γ₀ in [0.1, 0.01, 0.001]
@@ -83,20 +81,20 @@ end
 
 best = get_best(results)
 
-# key = rand(keys(best))
-# res = results[best[key][2]][1]
-# plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
-# title!("Rosenbrock (n=$(key[1]))");
-# plot!(fontfamily="Computer Modern");
-# # plot!(xscale=:log);
-# # plot!(yscale=:log);
-# savefig("img/temp.png")
+key = rand(keys(best))
+res = results[best[key][2]][1]
+plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
+title!("Rosenbrock (n=$(key[1]))");
+plot!(fontfamily="Computer Modern");
+# plot!(xscale=:log);
+# plot!(yscale=:log);
+savefig("img/temp.png")
 
 
 
 # Calculate for Best Parameters
 best_results = Dict()
-iter = 1000000
+iter = 1 # 1_000_000
 for (_, (_, key)) in best
     n, k, γ₀, γ₁, λ = key
     print("n : $n , ")
@@ -106,7 +104,7 @@ for (_, (_, key)) in best
     print("λ : $λ \n")
     try
         xss = []
-        for seed in 1:1
+        for seed in 1:10
             Random.seed!(seed)
             x₀ = zeros(n)
             # x₀ = 0.99 * ones(n)
@@ -129,27 +127,27 @@ for (_, (_, key)) in best
 end
 
 
-key = rand(keys(best_results))
-res = best_results[key][1]
-plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
-title!("Rosenbrock (n=$(key[1]))");
-plot!(fontfamily="Computer Modern");
-# plot!(xscale=:log);
-# plot!(yscale=:log);
-savefig("img/temp.png")
+# key = rand(keys(best_results))
+# res = best_results[key][1]
+# plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
+# title!("Rosenbrock (n=$(key[1]))");
+# plot!(fontfamily="Computer Modern");
+# # plot!(xscale=:log);
+# # plot!(yscale=:log);
+# savefig("img/temp.png")
 
 
-key = rand(keys(results))
-res = results[key][1]
-plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
-savefig("img/temp.png")
-
-# serialize("results.ser", results)
-for key in keys(results)
-    res = results[key][1]
-    print("Press enter to continue> ")
-    readline()
-end
-
-results[(100, 10)][1][:, end]
-rosenbrock(0.99 * ones(100))
+# key = rand(keys(results))
+# res = results[key][1]
+# plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
+# savefig("img/temp.png")
+# 
+# # serialize("results.ser", results)
+# for key in keys(results)
+#     res = results[key][1]
+#     print("Press enter to continue> ")
+#     readline()
+# end
+# 
+# results[(100, 10)][1][:, end]
+# rosenbrock(0.99 * ones(100))

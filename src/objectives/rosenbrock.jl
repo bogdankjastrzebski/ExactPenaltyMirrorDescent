@@ -46,8 +46,12 @@ end
 
 
 function rosenbrock_penalty(x)
-    norm = sqrt(x'x)
-    return abs(norm - sqrt(size(x, 1)))
+    k = size(x, 1)
+    return abs.(x'x - k)
+    # norm = sqrt(x'x)
+    # 
+    # return abs(norm - 10.0)
+    # return 0.0 * sum(x)
 end
 
 

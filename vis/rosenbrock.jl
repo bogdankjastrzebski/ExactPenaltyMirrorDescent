@@ -26,7 +26,7 @@ mirror = Mirror(rosenbrock_through, rosenbrock_back)
 projection = rosenbrock_projection
 # Finding Best Parameters
 results = Dict()
-iter = 10
+iter = 10_000
 for n in [4, 8, 16, 32]
 for k in [1]
 for γ₀ in [0.1, 0.01, 0.001]
@@ -81,20 +81,20 @@ end
 
 best = get_best(results)
 
-key = rand(keys(best))
-res = results[best[key][2]][1]
-plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
-title!("Rosenbrock (n=$(key[1]))");
-plot!(fontfamily="Computer Modern");
+# key = rand(keys(best))
+# res = results[best[key][2]][1]
+# plot(1:size(res, 2), [rosenbrock(res[:, k]) for k in 1:size(res, 2)]);
+# title!("Rosenbrock (n=$(key[1]))");
+# plot!(fontfamily="Computer Modern");
 # plot!(xscale=:log);
 # plot!(yscale=:log);
-savefig("img/temp.png")
+# savefig("img/temp.png")
 
 
 
 # Calculate for Best Parameters
 best_results = Dict()
-iter = 1 # 1_000_000
+iter = 1_000_000
 for (_, (_, key)) in best
     n, k, γ₀, γ₁, λ = key
     print("n : $n , ")

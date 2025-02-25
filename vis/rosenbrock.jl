@@ -1,4 +1,6 @@
 # using P] activate .
+using Pkg
+Pkg.activate(".")
 using ExactPenaltyMirrorDescent
 
 using Plots

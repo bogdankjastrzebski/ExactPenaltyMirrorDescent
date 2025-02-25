@@ -6,6 +6,7 @@ function rosenbrock(x; a=1, b=100)
     )
 end
 
+
 function rosenbrock_random(x; a=1, b=100, n=1)
     return sum(
         b * (x[i+1] + x[i]^2)^2 + (a - x[i])^2
@@ -13,7 +14,28 @@ function rosenbrock_random(x; a=1, b=100, n=1)
     )
 end
 
-function rosenbrock_projection(x)
-   return x / sqrt(x'x)
+
+function rosenbrock_projection(x, k=1.0)
+    norm = sqrt(x'x)
+    # return norm > k ? x/norm : x
+    return x
 end
+
+
+function rosenbrock_through(x)
+    # return x'x * x
+    return x
+end
+
+
+function rosenbrock_back(x)
+    # return (x'x)^(-1/3) * x
+    return x
+end
+
+
+function rosenbrock_penalty(x)
+    return 0.0 * sum(x)
+end
+
 

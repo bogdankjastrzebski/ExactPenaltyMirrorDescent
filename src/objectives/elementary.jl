@@ -51,17 +51,33 @@ function second_objective(x)
 end
 
 function second_objective_projection(x)
-    return clamp.(x, -1.0, 1.0)
+    return clamp.(x, -10.0, 10.0)
 end
 
+function second_objective_penalty(x)
+    # return abs(x[1] + x[2] - 5)
+    # return abs(x[1] * x[2] - 5)
+    return abs(x[1] - x[2])
+end
+
+
+function second_objective_through(x)
+    return (x'x)^(-1/3) * x
+    # return cbrt.([x[1]^2/x[2], x[2]^2/x[1]])
+end
+
+function second_objective_back(x)
+    return x'x * x
+    # return [x[2]*x[1]^2, x[1]*x[2]^2]
+end
 
 objectives["second_objective"] = (
     second_objective,
     second_objective_projection,
-    Nothing,
-    Nothing, # mirror
-    ((-12, 15), (-11, 16), (0, 50000)),
-    [10., 10.],
+    second_objective_penalty,
+    (second_objective_through, second_objective_back),
+    ((-12, 12), (-12, 12), (0, 50000)),
+    [5., 10.],
     (45, 45), # camera
 )
 
@@ -149,13 +165,31 @@ function beale(x)
     return h(x[1], x[2])
 end
 
+function beale_projection(x)
+    return [max(x[1], 0.0), min(x[2], 1.0)]
+end
+
+function beale_penalty(x)
+    return abs(sqrt(x'x) - 3)
+end
+
+function beale_through(x)
+    # return x'x * x
+    return x
+end
+
+function beale_back(x)
+    # return (x'x)^(-1/3) * x
+    return x
+end
+
 objectives["beale"] = (
     beale,
-    Nothing, # projection,
-    Nothing,
-    Nothing, # mirror
+    beale_projection,
+    beale_penalty,
+    (beale_through, beale_back),
     ((-5, 5), (-5, 5), (0, 1000)),
-    ones(2),
+    [0.0, -2.0],
     (45, 45), # camera
 )
 
@@ -176,7 +210,7 @@ end
 Bound the goldstein price argument (in norm) for
 numerical stability. 
 """
-function goldstein_price_projection(x, A=-1.0, B=1.5)
+function goldstein_price_projection(x, A=-1.0, B=1.0)
     # return norm(x) > B ? B * x / norm(x) : x
     return clamp.(x, A, B)
 end
@@ -192,8 +226,18 @@ desired value.
     interesting, if it will be able to find the
     proper minimum.
 """
-function goldstein_price_penalty(x, x₂=-0.5)
-    return (abs(x[2] - x₂) + 2.0)^2
+function goldstein_price_penalty(x, x₂=-0.5, k=1)
+    return (abs(x[2] - x₂) + k)^2 / k^2
+end
+
+
+function goldstein_price_through(x)
+    return x'x * x
+end
+
+
+function goldstein_price_back(y)
+    return (y'y)^(-1/3) * y
 end
 
 
@@ -201,10 +245,11 @@ objectives["goldstein_price"] = (
     goldstein_price,
     goldstein_price_projection,
     goldstein_price_penalty,
-    Nothing, # mirror
+    (goldstein_price_through, goldstein_price_back),
     ((-2, 2), (-3, 1), (0, 10000)),
+    # ((-1, 1), (-1, 1), (0, 10000)),
     [1., 0.],
-    (135, 45), # camera
+    (45, 45), # camera
 )
 
 
@@ -230,11 +275,27 @@ function bukin(x)
     return h(x[1], x[2])
 end
 
+function bukin_projection(x, s=[5.0, 2.0])
+    return clamp.(x ./ s, -1, 1) .* s
+end
+
+function bukin_penalty(x)
+    return 0.0 * sum(x)
+end
+
+function bukin_through(x, s=[5.0, 2.0])
+    return x ./ s
+end
+
+function bukin_back(x, s=[5.0, 2.0])
+    return s .* x
+end
+
 objectives["bukin"] = (
     bukin,
-    Nothing,  # bukin_projection,
-    Nothing,
-    Nothing, # mirror
+    bukin_projection,
+    bukin_penalty,
+    (bukin_through, bukin_back),
     ((-5, 5), (-4, 6), (0, 250)),
     ones(2),
     (45, 45), # camera

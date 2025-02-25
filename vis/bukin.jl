@@ -9,7 +9,7 @@ using Zygote
 include("vis/general.jl")
 
 Random.seed!(0)
-objective_name = "goldstein_price"
+objective_name = "bukin"
 objective, projection, penalty, mirror, bounds, x₀, camera = objectives[objective_name]
 mirror = Mirror(mirror[1], mirror[2])
 # mirror = identity_mirror
@@ -29,20 +29,19 @@ end
 xs, vs = mirror_descent(
     oracle(objective_penalty, x₀, 0.5),
     0.1randn(2) + float.(x₀),
-    γ=n->1.0/(n^0.5),
+    γ=n->0.005*1.0/(n^0.5),
     λ=n->0.1,
-    # iterations=100000,
-    iterations=2000,
+    iterations=10000,
     mirror=mirror,
     project=projection,
 )
 # top
-view_top(objective_penalty, xs, bounds=bounds, n=100, levels=64);
+view_top(objective_penalty, xs, bounds=bounds, n=100, levels=32);
 title!(transform_name(objective_name));
 plot!(size=(400, 400));
 plot!(fontfamily="Computer Modern");
-plot!([-1, 1, 1, -1, -1], [-1, -1, 1, 1, -1], color="red");
-plot!([-1, 1], [-0.5, -0.5], color="green");
+plot!(5*[-1, 1, 1, -1, -1], 2*[-1, -1, 1, 1, -1], color="red");
+# plot!([-1, 1], [-0.5, -0.5], color="green");
 savefig("img/goldstein_price/$(objective_name)_top_penalty.png");
 
 # 3d

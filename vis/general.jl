@@ -33,6 +33,18 @@ function my_palette(n=400)
 end
 
 
+ """view_top(f, xs; bounds=((-2, 2), (-2, 2), :auto), n=64, levels=32, ϵ=1e-1)
+
+Creates a contour plot of a function `f` with overlaid data points.
+
+# Arguments
+- `f::Function`: Objective function (ℝ² -> ℝ).
+- `xs::Matrix{Float64}`: Data points to overlay (2 x N matrix).
+- `bounds::Tuple`: Axis ranges ((xmin, xmax), (ymin, ymax), (zmin, zmax)).
+- `n::Int`: Number of grid points per dimension.
+- `levels::Int`: Number of contour levels.
+- `ϵ::Float64`: Clamp range extension for z-values.
+"""
 function view_top(
             f, xs;
             bounds=((-2, 2), (-2, 2)), n=64,
@@ -76,9 +88,23 @@ function view_top(
 end
 
 
+
+"""view_3d(f, xs; bounds=((-2, 2), (-2, 2), :auto), n=64, camera=(150, 30), ϵ=1e-1)
+
+Creates a 3D surface plot of a function `f` with overlaid data points.
+
+# Arguments
+- `f::Function`: The objective function (ℝ² -> ℝ).
+- `xs::Matrix{Float64}`: Data points to overlay (2 x N matrix).
+- `bounds::Tuple`: Axis ranges ((xmin, xmax), (ymin, ymax), (zmin, zmax)).
+- `n::Int`: Number of grid points per dimension for surface.
+- `camera::Tuple`: Camera angle (azimuth, elevation).
+- `ϵ::Float64`: Clamp range extension for z-values.
+"""
 function view_3d(
             f, xs;
-            bounds=((-2, 2), (-2, 2)), n=64,
+            bounds=((-2, 2), (-2, 2)),
+            n=64,
             camera=(150, 30),
             ϵ=1e-1,
         )
@@ -100,6 +126,18 @@ function view_3d(
 end
 
 
+"""convergence_plot(f, xss)
+
+Plots average objective value (log scale) vs. iteration for
+optimization trajectories `xss` with objective function `f`.
+
+# Arguments
+- `f::Function`: Objective function (scalar output).
+- `xss::Array{Matrix{Float64}, 1}`: Trajectories (d x n matrices).
+
+# Returns
+A Plots.Plot object.
+"""
 function convergence_plot(f, xss)
     m = size(xss, 1)
     n = size(xss[1], 2)
@@ -110,27 +148,17 @@ function convergence_plot(f, xss)
 end
 
 
-view_3d(second_objective, [0, 0]);
-savefig("img/second_objective_3d.pdf")
-
-
-view_3d(rosenbrock, xs[:, 1:1000])
-savefig("img/rosenbrock_3d.pdf")
-
-
+"""transform_name(input_string::String)
+Transforms a snake_case string (e.g., not_the_camel_case) into a
+space-separated string of capitalized words (e.g., Not The Camel Case).
+# Args:
+  input_string: The string to transform (in snake_case).
+# Returns:
+  A string with each word capitalized and separated by spaces.
+"""
 function transform_name(input_string::String)
-    """
-    Transforms a snake_case string (e.g., not_the_camel_case) into a
-    space-separated string of capitalized words (e.g., Not The Camel Case).
-    Args:
-      input_string: The string to transform (in snake_case).
-    Returns:
-      A string with each word capitalized and separated by spaces.
-    """
     words = split(input_string, "_")
     capitalized_words = map(x -> titlecase(x), words)
     transformed_string = join(capitalized_words, " ")
     return transformed_string
 end
-
-

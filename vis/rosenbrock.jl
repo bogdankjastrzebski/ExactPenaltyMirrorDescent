@@ -1,8 +1,11 @@
-using Plots
+] activate .
 using ExactPenaltyMirrorDescent
+
+using Plots
 using LaTeXStrings
 using ExactPenaltyMirrorDescent.Objectives: rosenbrock, rosenbrock_random, rosenbrock_projection, rosenbrock_through, rosenbrock_back, rosenbrock_penalty
 using LinearAlgebra
+using ProgressBars
 using Random
 using Zygote
 
@@ -21,25 +24,33 @@ projection = rosenbrock_projection
 
 results = Dict()
 for n in [10, 100, 1000]
+for k in [1, 10, 100]
+for lr in [0.001, 0.01, 0.05]
     xss = []
-    k = 10
-    for seed in 1:10
+    for seed in 1:1
+        println
         Random.seed!(seed)
-        iter = 10000
-        x₀ = -ones(n)
+        iter = 1000
+        x₀ = zeros(n)
         xs, vs = mirror_descent(
-            oracle(n),
+            oracle(k),
             float.(x₀),
-            γ=n->0.0001/(n^0.2),
-            λ=n->0.01,
+            γ=n->lr/(n^0.5),
+            λ=n->0.1,
             iterations=iter,
             mirror=mirror,
             project=projection,
         )
         push!(xss, xs)
     end
-    results[n] = xss
+    results[(n, k)] = xss
+    serialize("results.ser", results)
 end
+end
+end
+serialize("results.ser", results)
 
-plot(1:iter, [rosenbrock(results[100][1][:, k]) for k in 1:iter]);
-savefig("img/temp.png")
+
+# plot(1:iter, [rosenbrock(results[1000][1][:, k]) for k in 1:iter]);
+# savefig("img/temp.png")
+

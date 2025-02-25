@@ -12,7 +12,7 @@ using Random
 using Zygote
 
 
-include("vis/general.jl")
+include("general.jl")
 
 objective_name = "rosenbrock"
 function oracle(n, p=0.1)

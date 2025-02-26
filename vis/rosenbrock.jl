@@ -13,7 +13,7 @@ using Zygote
 using Serialization
 
 
-# include("general.jl")
+include("general.jl")
 
 objective_name = "rosenbrock"
 function oracle(n, p=0.0001)
@@ -120,7 +120,7 @@ for (_, (_, key)) in best
             push!(xss, xs)
         end
         best_results[(n, k, γ₀, γ₁, λ)] = xss
-        serialize("results/best_results.ser", results)
+        serialize("results/best_results.ser", best_results)
     catch e             
         println(e)
     end

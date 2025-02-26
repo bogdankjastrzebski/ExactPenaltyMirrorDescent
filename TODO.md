@@ -31,4 +31,4 @@ Priority queue:
 - [ ] write the whole thing up
 - [ ] pewnych rzeczy się nie nauczysz, może trzeba właśnie szukać tak, by nie trzeba było się dalej uczyć?
 
-
+Hello?
